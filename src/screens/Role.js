@@ -1,11 +1,14 @@
+import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-export default function Role({ navigation }) {
+export default function Role() {
   const [viewShow, setViewShow] = useState(false);
+  const navigation = useNavigation();
 
   const [roles, setRoles] = useState({
+    All: false,
     Administrative: false,
     Manager: false,
     Intern: false,
@@ -17,173 +20,94 @@ export default function Role({ navigation }) {
   const activeRoles = Object.keys(roles).filter(item => roles[item] === true);
   console.log(activeRoles, ' selected roles');
 
-  const activeRolesLength=()=>{
-    Object.values(roles).filter(item => roles[item] === true).length
-  }
-
   const clearFilter = () => {
     setRoles({
-      Administrative:false,
-      Manager:false,
-      Intern:false,
-      "Backend Developer":false,
-      "Frontend Developer":false,
-      "Software Tester":false
-    })
-    setViewShow(false)
-  }
+      All: false,
+      Administrative: false,
+      Manager: false,
+      Intern: false,
+      'Backend Developer': false,
+      'Frontend Developer': false,
+      'Software Tester': false,
+    });
+    setViewShow(false);
+  };
+
+  const roleList = [
+    'All',
+    'Administrative',
+    'Manager',
+    'Intern',
+    'Backend Developer',
+    'Frontend Developer',
+    'Software Tester',
+  ];
 
   return (
     <>
-      <View style={styles.content}>
-        <TouchableOpacity
-          style={styles.btn}
-          onPress={() => {
-            setRoles(prev => ({ ...prev, Administrative: !prev.Administrative })),
-              setViewShow(prev => !prev);
-          }}
-        >
-          <Text style={styles.txt}>Administrative</Text>
-          <Image
-            source={
-              roles.Administrative
-                ? require('../assests/check-circle.png')
-                : require('../assests/circle.png')
-            }
-            style={styles.circleimg}
-          />
-        </TouchableOpacity>
-      </View>
+      {roleList.map(role => (
+        <View style={styles.content} key={role}>
+          <TouchableOpacity
+            style={styles.btn}
+            onPress={() => {
+              // 👉 ALL pe click
+              if (role === 'All') {
+                const value = !roles.All;
 
-      <View style={styles.content}>
-        <TouchableOpacity
-          style={styles.btn}
-          onPress={() => {
-            setRoles(prev => ({ ...prev, Manager: !prev.Manager })),
-              setViewShow(prev => !prev);
-          }}
-        >
-          <Text style={styles.txt}>Manager</Text>
-          <Image
-            source={
-              roles.Manager
-                ? require('../assests/check-circle.png')
-                : require('../assests/circle.png')
-            }
-            style={styles.circleimg}
-          />
-        </TouchableOpacity>
-      </View>
+                const newRoles = {};
+                Object.keys(roles).forEach(key => {
+                  newRoles[key] = value;
+                });
 
-      <View style={styles.content}>
-        <TouchableOpacity
-          style={styles.btn}
-          onPress={() => {
-            setRoles(prev => ({ ...prev, Intern: !prev.Intern })),
-              setViewShow(prev => !prev);
-          }}
-        >
-          <Text style={styles.txt}>Intern</Text>
-          <Image
-            source={
-              roles.Intern
-                ? require('../assests/check-circle.png')
-                : require('../assests/circle.png')
-            }
-            style={styles.circleimg}
-          />
-        </TouchableOpacity>
-      </View>
+                setRoles(newRoles);
+              } else {
+                // 👉 normal role click
+                setRoles(prev => ({
+                  ...prev,
+                  [role]: !prev[role],
+                }));
+              }
 
-      <View style={styles.content}>
-        <TouchableOpacity
-          style={styles.btn}
-          onPress={() => {
-            setRoles(prev => ({
-              ...prev,
-              'Backend Developer': !prev['Backend Developer'],
-            })),
-              setViewShow(prev => !prev);
-          }}
-        >
-          <Text style={styles.txt}>Backend Developer</Text>
-          <Image
-            source={
-              roles['Backend Developer']
-                ? require('../assests/check-circle.png')
-                : require('../assests/circle.png')
-            }
-            style={styles.circleimg}
-          />
-        </TouchableOpacity>
-      </View>
+              // setViewShow(true);
+            }}
+          >
+            <Text style={styles.txt}>{role}</Text>
 
-      <View style={styles.content}>
-        <TouchableOpacity
-          style={styles.btn}
-          onPress={() => {
-            setRoles(prev => ({
-              ...prev,
-              'Frontend Developer': !prev['Frontend Developer'],
-            })),
-              setViewShow(prev => !prev);
-          }}
-        >
-          <Text style={styles.txt}>Frontend Developer</Text>
-          <Image
-            source={
-              roles['Frontend Developer']
-                ? require('../assests/check-circle.png')
-                : require('../assests/circle.png')
-            }
-            style={styles.circleimg}
-          />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.content}>
-        <TouchableOpacity
-          style={styles.btn}
-          onPress={() => {
-            setRoles(prev => ({
-              ...prev,
-              'Software Tester': !prev['Software Tester'],
-            })),
-              setViewShow(prev => !prev);
-          }}
-        >
-          <Text style={styles.txt}>Software Tester</Text>
-          <Image
-            source={
-              roles['Software Tester']
-                ? require('../assests/check-circle.png')
-                : require('../assests/circle.png')
-            }
-            style={styles.circleimg}
-          />
-        </TouchableOpacity>
-      </View>
+            <Image
+              source={
+                roles[role]
+                  ? require('../assests/check-circle.png')
+                  : require('../assests/circle.png')
+              }
+              style={styles.circleimg}
+            />
+          </TouchableOpacity>
+        </View>
+      ))}
 
       {/* bottom view */}
       {/* {viewShow && ( */}
-        <View style={styles.slctView}>
-          <TouchableOpacity style={styles.btnSelect} onPress={clearFilter}>
-            <Text style={styles.selectTxt}>Clear Filter</Text>
-          </TouchableOpacity>
+      <View style={styles.slctView}>
+        <TouchableOpacity style={styles.btnSelect} onPress={clearFilter}>
+          <Text style={styles.selectTxt}>Clear Filter</Text>
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.confirmbtn}
-            onPress={() => {
-              navigation.navigate({
-                name: 'Filter',
-                params: { activeRoles: activeRoles,activeRolesLength:activeRolesLength },
-                merge: true,
-              });
-            }}
-          >
-            <Text style={styles.selectTxt}>Confirm</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.confirmbtn}
+          onPress={() => {
+            navigation.navigate({
+              name: 'Filter',
+              params: {
+                activeRoles: activeRoles,
+                activeRolesLength: activeRolesLength,
+              },
+              merge: true,
+            });
+          }}
+        >
+          <Text style={styles.selectTxt}>Confirm</Text>
+        </TouchableOpacity>
+      </View>
       {/* // )} */}
     </>
   );

@@ -13,8 +13,10 @@ import React, { useEffect, useState } from 'react';
 import { Picker } from '@react-native-picker/picker';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
+import { useNavigation } from '@react-navigation/native';
 
-export default function UpdateUser({ navigation, route }) {
+export default function UpdateUser({  route }) {
+  const navigation = useNavigation();
   
   const validationSchema = Yup.object().shape({
     name: Yup.string()
@@ -184,7 +186,10 @@ export default function UpdateUser({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  container: { 
+    flex: 1, 
+    padding: 20 
+  },
 
   input: {
     borderWidth: 1,
@@ -241,7 +246,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  imgstl: { height: 150, width: 150, borderRadius: 150 },
+  imgstl: { 
+    height: 150, 
+    width: 150, 
+    borderRadius: 150 
+  },
 
   headview: {
     height: 50,

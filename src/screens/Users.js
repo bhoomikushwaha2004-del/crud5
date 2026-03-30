@@ -15,8 +15,10 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 
 import { createUser } from '../services/userApi';
+import { useNavigation } from '@react-navigation/native';
 
-export default function UserForm({ navigation }) {
+export default function UserForm() {
+  const navigation = useNavigation();
 
   const validationSchema = Yup.object().shape({
     name: Yup.string()

@@ -1,4 +1,4 @@
-import { useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useState } from 'react';
 import {
   Image,
@@ -10,8 +10,10 @@ import {
   View,
 } from 'react-native';
 
-export default function Filter({ navigation }) {
+export default function Filter() {
   const [showModal, setShowModal] = useState(false);
+  const navigation = useNavigation();
+
  
 
   const [isActive,setIsActive] = useState({
@@ -21,22 +23,24 @@ export default function Filter({ navigation }) {
 
 
   const route = useRoute();
-  const activeRoles = route.params?.activeRoles;
-  const activeRolesLength=route.params?.activeRolesLength;
+  const [selectedRoles, setSelectedRoles] = useState(
+  route.params?.activeRoles || [] );
+
   
 
 
   const isChoice = Object.keys(isActive).filter((item)=> isActive[item]===true)
-  // console.log(isChoice)
 
-  const showView = isChoice.length >0 || activeRoles 
+
+  const showView = isChoice.length >0 || selectedRoles.length > 0
 
   const clearfn = () => {
     setIsActive({
       Active:false,
       Inactive:false
     })
-    navigation.setParams({activeRoles:[]})
+    setSelectedRoles([])
+    setShowModal(false)
     }
     
   
@@ -62,11 +66,11 @@ export default function Filter({ navigation }) {
     
 
           {/* selected roles */}
-          { activeRoles    && (
+          { selectedRoles.length > 0 && (
             <View style={styles.content}> 
             <Text> Selected Roles:</Text>
             <View style={styles.btn}>
-              <Text style={{color:'white', marginLeft:10}}>{activeRoles.join(', ')} </Text>
+              <Text style={{color:'white', marginLeft:10}}>{selectedRoles.join(', ')} </Text>
             </View>
           </View>
           )}
@@ -88,7 +92,7 @@ export default function Filter({ navigation }) {
 
 
             {/* selected status */}
-            {isChoice.length>0 && (
+            {isChoice.length > 0 && (
               <View >
             <Text>Selected Status:</Text>
             <View style={styles.btn}>
@@ -165,7 +169,7 @@ export default function Filter({ navigation }) {
                 <Text style={{color:'white',textAlign:'center',marginTop:10,fontSize:15}}>Clear</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.savebtn} onPress={() => {navigation.navigate({name:'All Users', params:{activeRoles:activeRoles, isChoice:isChoice}, merge:true} )}}>
+            <TouchableOpacity style={styles.savebtn} onPress={() => {navigation.navigate({name:'All Users', params:{activeRoles:selectedRoles, isChoice:isChoice}, merge:true} )}}>
                 <Text style={{color:'white',textAlign:'center',marginTop:10,fontSize:15,}}>Save</Text>
             </TouchableOpacity>
         </View>

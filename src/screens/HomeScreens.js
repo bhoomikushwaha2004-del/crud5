@@ -9,42 +9,51 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import NoDataFound from '../components/NoDataFound';
+import NoDataFound from '../screens/NoDataFound';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getUsers } from '../services/userApi';
-import HomeHeader from '../components/HomeHeader';
-import { useRoute } from '@react-navigation/native';
-import Loader from '../components/Loader'
+import HomeHeader from '../component/HomeHeader';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import Loader from '../component/Loader';
 
-export default function HomeScreens({ navigation }) {
+export default function HomeScreens() {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const[isLoader,setIsLoader] = useState(false)
+  const [isLoader, setIsLoader] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const route = useRoute();
+  const navigation = useNavigation();
   const isChoice = route.params?.isChoice || [];
-  console.log(isChoice,"status on home")
-  const activeRoles = route.params?.activeRoles || []
-  console.log(activeRoles,"roles on home")
+  console.log(isChoice, 'status on home');
+  const activeRoles = route.params?.activeRoles || [];
+  console.log(activeRoles, 'roles on home');
 
   useEffect(() => {
     getApi();
-    setIsLoader(true)
+    setIsLoader(true);
   }, []);
 
   useEffect(() => {
-    if(data.length>0) {
-      applyFilter('')
+    if (data.length > 0) {
+      applyFilter('');
     }
-  },[data])
+  }, [data]);
 
   const getApi = async () => {
     const result = await getUsers();
     setData(result);
     setFilteredData(result);
-    setIsLoader(false)
+    setIsLoader(false);
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    const result = await getUsers();
+    setData(result);
+    setFilteredData(result);
+    setRefreshing(false);
+  };
 
   const updnvg = item => {
     navigation.navigate('Update', { item });
@@ -54,42 +63,39 @@ export default function HomeScreens({ navigation }) {
     navigation.navigate('User', { item });
   };
 
-  const applyFilter = (input ) => {
+  const applyFilter = input => {
     const filtered = data.filter(entry => {
+      const handle =
+        entry.name?.toLowerCase().includes(input.toLowerCase()) ||
+        entry.email?.toLowerCase().includes(input.toLowerCase()) ||
+        entry.role?.toLowerCase().includes(input.toLowerCase()) ||
+        entry.status?.toLowerCase().includes(input.toLowerCase());
 
-      const handle = entry.name?.toLowerCase().includes(input.toLowerCase()) ||
-    entry.email?.toLowerCase().includes(input.toLowerCase()) ||
-    entry.role?.toLowerCase().includes(input.toLowerCase()) ||
-    entry.status?.toLowerCase().includes(input.toLowerCase())
+      const statusMatch =
+        isChoice.length === 0 || isChoice.includes(entry.status);
 
-    const statusMatch = isChoice.length===0 || isChoice.includes(entry.status);
+      const roleMatch =
+        activeRoles.length === 0 || activeRoles.includes(entry.role);
 
-    const roleMatch = activeRoles.length===0 || activeRoles.includes(entry.role);
-
-    return handle && statusMatch && roleMatch
-    })
+      return handle && statusMatch && roleMatch;
+    });
 
     setFilteredData(filtered);
   };
-  console.log(applyFilter, 'applifilter')
+  console.log(applyFilter, 'applifilter');
 
   const handleSearch = input => {
-    applyFilter(input)
-  }
+    applyFilter(input);
+  };
 
-  if(isLoader) {
-    return(
-      <Loader />
-    )
+  if (isLoader) {
+    return <Loader />;
   }
-
-  
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle={'dark-content'} />
 
-      
       <HomeHeader
         data={data}
         filteredData={filteredData}
@@ -97,16 +103,21 @@ export default function HomeScreens({ navigation }) {
         navigation={navigation}
         applyFilter={applyFilter}
       />
-      {filteredData.length===0 ? 
-        <NoDataFound navigation={navigation} />
-        :
+      {filteredData.length === 0 ? (
+        <NoDataFound
+          onReset={() => {
+            applyFilter('');
+          }}
+        />
+      ) : (
         <FlatList
-        data={filteredData}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => <GetUsers item={item} updnvg={updnvg} />}
-      />
-      }
-      
+          data={filteredData}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => <GetUsers item={item} updnvg={updnvg} />}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        />
+      )}
 
       <TouchableOpacity style={styles.plsicon} onPress={usrnvg}>
         <Text style={styles.plstxt}>+ </Text>
@@ -169,7 +180,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     margin: 10,
-    elevation:8
+    elevation: 8,
   },
 
   divider: {
@@ -187,7 +198,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     height: 100,
     width: 97,
-    elevation:5
+    elevation: 5,
   },
   plstxt: {
     color: 'white',
@@ -198,7 +209,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
     marginLeft: 7,
-    elevation:8
+    elevation: 8,
   },
   plsicon: {
     position: 'absolute',
@@ -208,6 +219,6 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     marginLeft: 300,
     marginTop: 750,
-    elevation:8
+    elevation: 8,
   },
 });
